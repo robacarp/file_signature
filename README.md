@@ -1,8 +1,6 @@
-* Docs: <http://sixarm.com/sixarm_ruby_magic_number_type/doc>
 * Repo: <http://github.com/robacarp/file_signature>
-* Email: Joel Parker Henderson, <joel@sixarm.com>
 * Email: Robert Carpenter, <coder@robacarp.com>
-
+* Email: Joel Parker Henderson, <joel@sixarm.com>
 
 ## Introduction
 
@@ -52,6 +50,7 @@ Compare:
 ## Changes
 
 * 2012-03-14 1.0.0 Update docs, tests
+* 2012-05-31 1.1.0 Add memo, reformat and rename things for clarity
 
 ## License
 
