@@ -3,10 +3,10 @@ Gem::Specification.new do |s|
   s.name              = "file_signature"
   s.summary           = "File signature adds the ability to inspect the first few bytes of a file to guess at mime-type."
   s.description       = "Monkeypatches File and IO to include a '''magic_number_type''' method which returns a symbol representing the mime type guessed based off of the first few bytes of a file."
-  s.version           = "1.1.0"
+  s.version           = "1.1.1"
   s.authors           = ["robacarp","SixArm"]
   s.email             = "coder@robacarp.com"
-  s.homepage          = "http://robacarp.com"
+  s.homepage          = "http://github.com/robacarp/file_signature"
 
   s.platform          = Gem::Platform::RUBY
   s.require_path      = 'lib'
