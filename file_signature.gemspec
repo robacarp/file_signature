@@ -1,13 +1,11 @@
 Gem::Specification.new do |s|
 
-  s.name              = "sixarm_ruby_magic_number_type"
-  s.summary           = "SixArm.com » Ruby » Magic number type inspects bytes to decide on a mime type"
+  s.name              = "file_signature"
+  s.summary           = "File signature inspects the first few bytes of a file to guess at mime-type."
   s.version           = "1.1.0"
-  s.author            = "SixArm"
-  s.email             = "sixarm@sixarm.com"
-  s.homepage          = "http://sixarm.com/"
-  s.signing_key       = '/home/sixarm/keys/certs/sixarm-rsa1024-x509-private.pem'
-  s.cert_chain        = ['/home/sixarm/keys/certs/sixarm-rsa1024-x509-public.pem']
+  s.authors           = ["SixArm", "robacarp"]
+  s.email             = "coder@robacarp.com"
+  s.homepage          = "robacarp.com"
 
   s.platform          = Gem::Platform::RUBY
   s.require_path      = 'lib'
@@ -33,5 +31,4 @@ Gem::Specification.new do |s|
 
   s.files             = top_files + lib_files + test_files
   s.test_files        = test_files
-
 end
