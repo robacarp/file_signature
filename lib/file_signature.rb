@@ -85,13 +85,18 @@ class IO
   #  - File.magic_number_type
 
   def magic_number_type
+    return @magic_number_memo if defined? @magic_number_memo
+
     bytes = ""
+    type = nil
+
     while bytes.size < SignatureSize
       bytes += read(1)
       type = SignatureMap[bytes]
-      return type if type
+      break if type
     end
-    return nil
+
+    @magic_number_memo = type
   end
 
 end
