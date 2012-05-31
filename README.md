@@ -9,9 +9,7 @@ Magic numbers are the first bits of a file or data stream which uniquely identif
 
 For example when the first bits are "BM", this identifies the file as a bitmap image file.
 
-For docs go to <http://sixarm.com/sixarm_ruby_magic_number_type/doc>
-
-Want to help? We're happy to get pull requests.
+Want to help? Feel free to fork it and submit a pull request.
 
 
 ## Install quickstart
@@ -30,7 +28,7 @@ Require:
 
 ## Details
 
-This gem infers based on widespread programming conventions for data file formats.
+This gem infers based on widespread programming conventions for data file formats.  It is tested on MRI 1.9.3.  If you test it and find it working on other rubies please share your success.
 
 These magic numbers are by convention and we are using this guide: http://www.astro.keele.ac.uk/oldusers/rno/Computing/File_magic.html
 
@@ -45,6 +43,11 @@ Compare:
   * MIME::Types ruby library 
   * Unix magic() command for testing files on disk
   * http://shared-mime.rubyforge.org/
+
+##TODO
+
+ * This library currently contains some pathetic handful of bytestrings for type identification... see if we can import some /usr/share/file/magic or something to extend this so its actually useful for more people.
+ * I think it might be a good idea to return the full mime type somewhere.
 
 
 ## Changes
