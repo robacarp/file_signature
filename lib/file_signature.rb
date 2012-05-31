@@ -3,8 +3,6 @@
 Please see README
 =end
 
-require 'pp'
-
 class IO
 
   # We implement magic by using a lookup hash.
