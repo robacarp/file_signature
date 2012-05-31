@@ -26,7 +26,7 @@ class IO
   #  - IO#magic_number_type
   #  - File.magic_number_type
 
-  MagicNumberTypeHash = {
+  SignatureMap = {
     "BC" => :bitcode,
     "BM" => :bitmap,
     "BZ" => :bzip,
@@ -62,7 +62,7 @@ class IO
     [0xD0,0xCF,0x11,0xE0].pack('c*') => :docfile
   }
 
-  MagicNumberMaxLength = 9  # Longest key
+  SignatureSize = SignatureMap.keys.inject(0){ |m,k| k.length > m ? k.length : m }
 
 
   # Detect the data type by checking various "magic number" conventions
@@ -86,10 +86,10 @@ class IO
 
   def magic_number_type
     bytes = ""
-    while bytes.size < 9 #MagicNumberMaxLengh
+    while bytes.size < SignatureSize
       bytes += read(1)
-      type = MagicNumberTypeHash[bytes]
-      return type if type 
+      type = SignatureMap[bytes]
+      return type if type
     end
     return nil
   end
