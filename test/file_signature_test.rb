@@ -24,6 +24,17 @@ describe File do
     'sample.tiff' => :tiff,
     'sample.xcf.bz2' => :bzip,
     'sample.xcf.gz' => :gzip,
+    'sample.mp3' => :mp3,
+    'sample.mp4' => :mp4,
+    'sample.m4a' => :m4a,
+    'sample.m4v' => :m4v,
+    'sample.mov' => :quicktime,
+    'sample.ogg' => :ogg,
+    'sample.webm' => :webm,
+    'sample.pdf' => :pdf,
+    'sample.wav' => :wave,
+    'sample.flac' => :flac,
+    'sample.aif' => :aiff,
   }
 
   FILE_TO_MAGIC_NUMBER_MAP.each_pair do |file_name, type|
