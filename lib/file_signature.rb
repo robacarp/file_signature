@@ -28,6 +28,7 @@ class IO
 
   SignatureMap = {
     "BC" => :bitcode,
+    [0xDE,0xC0,0x17,0x0B].pack('c*') => :bitcode,
     "BM" => :bitmap,
     "BZ" => :bzip,
     "MZ" => :exe,
@@ -179,7 +180,11 @@ class IO
         type = :m4a
       when '3gpp'
         type = :video_3gpp
+      when '3gp4'
+        type = :video_3gpp
       when '3gp2'
+        type = :video_3gpp2
+      when '3g2a'
         type = :video_3gpp2
       end
     end
