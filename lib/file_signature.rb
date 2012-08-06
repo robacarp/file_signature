@@ -88,9 +88,9 @@ class IO
     :flac => 'audio/flac',
     :niff => 'application/vnd.music-niff',
     :midi => 'audio/midi',
+    :fits => 'image/fits',
     :unix_elf => 'application/octet-stream',
     :bitcode => 'application/octet-stream',
-    :fits => 'application/octet-stream',
     :gks => 'application/octet-stream',
     :iris_rgb => 'application/octet-stream',
     :itc => 'application/octet-stream',
@@ -192,14 +192,14 @@ class IO
   # and then looking up the MIME type from a hash.
   # Returns 'application/octet-stream' for unknown types 
   def mime_type
-    return @magic_number_memo if defined? @magic_number_memo
+    return @mime_memo if defined? @mime_memo
     type = self.magic_number_type
     if type
       m = MimeTypeMap[type]
     else
       m = 'application/octet-stream'
     end
-    @magic_number_memo = m
+    @mime_memo = m
   end
 
 end

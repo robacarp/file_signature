@@ -14,34 +14,40 @@ require 'file_signature'
 describe File do
 
   FILE_TO_MAGIC_NUMBER_MAP = {
-    'sample.fit' => :fits,
-    'sample.gif' => :gif,
-    'sample.jpg' => :jpeg,
-    'sample.png' => :png,
-    'sample.ps' => :postscript,
-    'sample.ras' => :sun_rasterfile,
-    'sample.sgi' => :iris_rgb,
-    'sample.tiff' => :tiff,
-    'sample.xcf.bz2' => :bzip,
-    'sample.xcf.gz' => :gzip,
-    'sample.mp3' => :mp3,
-    'sample.mp4' => :mp4,
-    'sample.m4a' => :m4a,
-    'sample.m4v' => :m4v,
-    'sample.mov' => :quicktime,
-    'sample.ogg' => :ogg,
-    'sample.webm' => :webm,
-    'sample.pdf' => :pdf,
-    'sample.wav' => :wave,
-    'sample.flac' => :flac,
-    'sample.aif' => :aiff,
+    'sample.fit' => [:fits, 'image/fits'],
+    'sample.gif' => [:gif, 'image/gif'],
+    'sample.jpg' => [:jpeg, 'image/jpeg'],
+    'sample.png' => [:png, 'image/png'],
+    'sample.ps' => [:postscript, 'application/postscript'],
+    'sample.ras' => [:sun_rasterfile, 'image/x-cmu-raster'],
+    'sample.sgi' => [:iris_rgb, 'application/octet-stream'],
+    'sample.tiff' => [:tiff, 'image/tiff'],
+    'sample.xcf.bz2' => [:bzip, 'application/x-bzip'],
+    'sample.xcf.gz' => [:gzip, 'application/x-gzip'],
+    'sample.mp3' => [:mp3, 'audio/mpeg'],
+    'sample.mp4' => [:mp4, 'video/mp4'],
+    'sample.m4a' => [:m4a, 'audio/mp4a-latm'],
+    'sample.m4v' => [:m4v, 'video/x-m4v'],
+    'sample.mov' => [:quicktime, 'video/quicktime'],
+    'sample.ogg' => [:ogg, 'application/ogg'],
+    'sample.webm' => [:webm, 'video/webm'],
+    'sample.pdf' => [:pdf, 'application/pdf'],
+    'sample.wav' => [:wave, 'audio/wave'],
+    'sample.flac' => [:flac, 'audio/flac'],
+    'sample.aif' => [:aiff, 'audio/x-aiff'],
   }
 
-  FILE_TO_MAGIC_NUMBER_MAP.each_pair do |file_name, type|
+  FILE_TO_MAGIC_NUMBER_MAP.each_pair do |file_name, v|
+    type = v[0]
+    mime = v[1]
     path = File.join("test","file_signature_test",file_name)
 
     it "guesses the expected magic number type by filename and path for #{type.to_s}" do
       File.magic_number_type(path).must_equal type
+    end
+
+    it "guesses the expected mime type by filename and path for #{mime}" do
+      File.mime_type(path).must_equal mime
     end
 
     f = File.open(path)
@@ -50,9 +56,18 @@ describe File do
       f.magic_number_type.must_equal type
     end
 
+    it "when called from an IO object for #{mime}" do
+      f.mime_type.must_equal mime
+    end
+
     it "when called from an IO object...a second time for #{type.to_s}" do
       #test it twice for the memo
       f.magic_number_type.must_equal type
+    end
+
+    it "when called from an IO object...a second time for #{mime}" do
+      #test it twice for the memo
+      f.mime_type.must_equal mime
     end
 
   end
