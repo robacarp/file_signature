@@ -27,7 +27,7 @@ describe File do
     'sample.sgi' => [:iris_rgb, 'application/octet-stream'],
     'sample.tiff' => [:tiff, 'image/tiff'],
     'sample.rar' => [:rar, 'application/x-rar-compressed'],
-    'sample.xcf.bz2' => [:bzip, 'application/x-bzip'],
+    'sample.xcf.bz2' => [:bzip2, 'application/x-bzip2'],
     'sample.xcf.gz' => [:gzip, 'application/x-gzip'],
     'sample.xcf.zip' => [:pkzip, 'application/zip'],
     'sample.xcf.Z' => [:compress, 'application/x-compress'],
@@ -55,6 +55,10 @@ describe File do
     'sample.flac' => [:flac, 'audio/flac'],
     'sample.aif' => [:aiff, 'audio/x-aiff'],
     'sample.elf' => [:unix_elf, 'application/octet-stream'],
+    'sample.gpg' => [:pgp_encrypted_data, 'application/octet-stream'],
+    'sample.pubring.gpg' => [:gnupg_public_ring, 'application/x-pgp-keyring'],
+    'sample.skr' => [:pgp_secret_ring, 'application/x-pgp-keyring'],
+    'sample.sh' => [:shebang, 'text/plain']
   }
 
   FILE_TO_MAGIC_NUMBER_MAP.each_pair do |file_name, v|
