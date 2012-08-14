@@ -52,7 +52,7 @@ class IO
     "gimp xcf" => :gimp_xcf,
     "#FIG" => :xfig,
     "/* XPM */" => :xpm,
-    [0x23,0x21].pack('c*') => :shebang,
+    "#!" => :shebang,
     [0x1F,0x9D].pack('c*') => :compress,
     [0x1F,0x8B,0x08].pack('c*') => :gzip,
     "PK" + [0x03,0x04].pack('c*') => :pkzip,
