@@ -56,6 +56,7 @@ class IO
     [0x1F,0x9D].pack('c*') => :compress,
     [0x1F,0x8B,0x08].pack('c*') => :gzip,
     "PK" + [0x03,0x04].pack('c*') => :pkzip,
+    "7z" + [0xBC,0xAF,0x27,0x1C].pack('c*') => :p7zip,
     "Rar!" + [0x1A,0x07,0x00].pack('c*') => :rar,
     [0x1A,0x45,0xDF,0xA3].pack('c*') => :webm,
     [0x4F,0x67,0x67,0x53,0x00].pack('c*') => :ogg,
@@ -71,13 +72,16 @@ class IO
     [0xA6,0x00].pack('c*') => :pgp_encrypted_data,
     [0x85,0x01].pack('c*') => :pgp_encrypted_data,
     [0x85,0x02].pack('c*') => :pgp_encrypted_data,
-    [0xD0,0xCF,0x11,0xE0].pack('c*') => :docfile
   }
 
   MimeTypeMap = {
     :compress => 'application/x-compress',
     :gzip => 'application/x-gzip',
     :pkzip => 'application/zip',
+    :p7zip => 'application/x-7z-compressed',
+    :ppt => 'application/vnd.ms-powerpoint',
+    :xls => 'application/vnd.ms-excel',
+    :tar => 'application/x-tar',
     :rar => 'application/x-rar-compressed',
     :webm => 'video/webm',
     :ogg => 'application/ogg',
@@ -154,21 +158,40 @@ class IO
     while bytes.size < SignatureSize
       bytes += read(1)
       type = SignatureMap[bytes]
-      break if type
+      return @magic_number_memo = type if type
     end
 
     #some cases require a more complicated match
     type = :aiff if (bytes[0,4] == 'FORM' && bytes[8,3] == 'AIF')
     type = :quicktime if bytes[4,4] == 'moov'
-    if bytes[0,4] == 'RIFF'
+    if bytes[0,4] == [0xD0,0xCF,0x11,0xE0].pack('c*')
+      # MS Office documents have further magic bytes @ 512 byte-offset
+      seek(512,IO::SEEK_SET)
+      bytes = read(16)
+      case bytes[0,4]
+      when [0x09,0x08,0x10,0x00].pack('c*')
+        type = :xls
+      when [0x60,0x21,0x1B,0xF0].pack('c*'),
+           [0x00,0x6E,0x1E,0xF0].pack('c*')
+        type = :ppt
+      when [0xEC,0xA5,0xC1,0x00].pack('c*')
+        type = :docfile
+      when [0xFD,0xFF,0xFF,0xFF].pack('c*')
+        case bytes[12,4]
+        when [0x04,0x00,0x00,0x00].pack('c*')
+          type = :xls
+        when [0x2D,0x00,0x00,0x00].pack('c*')
+          type = :docfile
+        end
+      end
+    elsif bytes[0,4] == 'RIFF'
       case bytes[8,6]
       when "WAVEfm"
         type = :wave
       when "WEBPVP"
         type = :webp
       end
-    end
-    if bytes[4,4] == 'ftyp'
+    elsif bytes[4,4] == 'ftyp'
       case bytes[8,3]
       when 'iso', 'mp4', 'avc'
         type = :mp4
@@ -184,6 +207,12 @@ class IO
         type = :quicktime
       end
     end
+    return @magic_number_memo = type if type
+    
+    #TAR files have magic bytes @ 257 byte-offset
+    seek(257,IO::SEEK_SET)
+    bytes = read(8)
+    type = :tar if (bytes[0,6] == "ustar\000" || bytes[0,8] == "ustar\040\040\000")
 
     @magic_number_memo = type
   end
