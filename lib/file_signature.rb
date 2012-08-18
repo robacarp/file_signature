@@ -42,6 +42,7 @@ class IO
     "IIN1" => :niff,
     "MThd" => :midi,
     "%PDF" => :pdf,
+    "{\\rtf" => :rtf,
     [0x89].pack('c*') + "PNG" + [0x0D,0x0A,0x1A,0x0A].pack('c*') => :png,
     "%!PS-Adobe-" => :postscript,
     "Y" + [0xA6].pack('c*') + "j" + [0x95].pack('c*') => :sun_rasterfile,
@@ -55,7 +56,6 @@ class IO
     "#!" => :shebang,
     [0x1F,0x9D].pack('c*') => :compress,
     [0x1F,0x8B,0x08].pack('c*') => :gzip,
-    "PK" + [0x03,0x04].pack('c*') => :pkzip,
     "7z" + [0xBC,0xAF,0x27,0x1C].pack('c*') => :p7zip,
     "Rar!" + [0x1A,0x07,0x00].pack('c*') => :rar,
     [0x1A,0x45,0xDF,0xA3].pack('c*') => :webm,
@@ -80,7 +80,9 @@ class IO
     :pkzip => 'application/zip',
     :p7zip => 'application/x-7z-compressed',
     :ppt => 'application/vnd.ms-powerpoint',
+    :pptx => 'application/vnd.openxmlformats-officedocument.presentationml.presentation',
     :xls => 'application/vnd.ms-excel',
+    :xlsx => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
     :tar => 'application/x-tar',
     :rar => 'application/x-rar-compressed',
     :webm => 'video/webm',
@@ -108,6 +110,7 @@ class IO
     :pgp_public_ring => 'application/x-pgp-keyring',
     :gnupg_public_ring => 'application/x-pgp-keyring',
     :docfile => 'application/msword',
+    :docx => 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
     :xfig => 'application/x-fig',
     :xpm => 'image/x-xpixmap',
     :shebang => 'text/plain',
@@ -119,6 +122,8 @@ class IO
     :sun_rasterfile => 'image/x-cmu-raster',
     :postscript => 'application/postscript',
     :pdf => 'application/pdf',
+    :rtf => 'text/rtf',
+    :jar => 'application/java-archive',
     :tiff => 'image/tiff',
     :bzip2 => 'application/x-bzip2',
     :exe => 'application/x-msdownload',
@@ -156,42 +161,84 @@ class IO
     type = nil
 
     while bytes.size < SignatureSize
-      bytes += read(1)
+      bytes << read(1)
       type = SignatureMap[bytes]
       return @magic_number_memo = type if type
     end
 
-    #some cases require a more complicated match
-    type = :aiff if (bytes[0,4] == 'FORM' && bytes[8,3] == 'AIF')
-    type = :quicktime if bytes[4,4] == 'moov'
-    if bytes[0,4] == [0xD0,0xCF,0x11,0xE0].pack('c*')
-      # MS Office documents have further magic bytes @ 512 byte-offset
-      seek(512,IO::SEEK_SET)
-      bytes = read(16)
-      case bytes[0,4]
-      when [0x09,0x08,0x10,0x00].pack('c*')
-        type = :xls
-      when [0x60,0x21,0x1B,0xF0].pack('c*'),
-           [0x00,0x6E,0x1E,0xF0].pack('c*')
-        type = :ppt
-      when [0xEC,0xA5,0xC1,0x00].pack('c*')
-        type = :docfile
-      when [0xFD,0xFF,0xFF,0xFF].pack('c*')
-        case bytes[12,4]
-        when [0x04,0x00,0x00,0x00].pack('c*')
-          type = :xls
-        when [0x2D,0x00,0x00,0x00].pack('c*')
-          type = :docfile
-        end
-      end
-    elsif bytes[0,4] == 'RIFF'
+    # some cases require a more complicated match
+    case bytes[0,4]
+    when 'FORM'
+      type = :aiff if bytes[8,3] == 'AIF'
+    when 'RIFF'
       case bytes[8,6]
       when "WAVEfm"
         type = :wave
       when "WEBPVP"
         type = :webp
       end
-    elsif bytes[4,4] == 'ftyp'
+    when "PK\003\004"
+      # What looks like a zip archive could contain various things
+      seek(30,IO::SEEK_SET)
+      # Look at the filename of the first file
+      more_bytes = read(19)
+      case more_bytes
+      when /META-INF\/PK/
+        type = :jar
+      when '[Content_Types].xml'
+        # This is a .docx, .pptx, or .xlsx file
+        # To figure out which, is grotty 
+        curr_bytes = [' ', ' ', ' ', ' ']
+        # skip to the 3rd file in the zip archive
+        2.times do
+          while (c = getc) do
+            curr_bytes.push(c).shift
+            break if curr_bytes.join == "PK\003\004"
+          end
+        end
+        # and look at its filename
+        seek(26, IO::SEEK_CUR)
+        more_bytes = read(5)
+        case more_bytes
+        when "word/"
+          type = :docx
+        when /ppt\//
+          type = :pptx
+        when /xl\//
+          type = :xlsx
+        end
+      else
+        type = :pkzip
+      end
+    when [0xD0,0xCF,0x11,0xE0].pack('c*')
+      if bytes[4,4] == [0xA1,0xB1,0x1A,0xE1].pack('c*')
+        # MS Office documents have further magic bytes @ 512 byte-offset
+        seek(512,IO::SEEK_SET)
+        more_bytes = read(16)
+        case more_bytes[0,4]
+        when "\011\010\020\000"
+          type = :xls
+        when [0x60,0x21,0x1B,0xF0].pack('c*'),
+             [0x00,0x6E,0x1E,0xF0].pack('c*')
+          type = :ppt
+        when [0xEC,0xA5,0xC1,0x00].pack('c*')
+          type = :docfile
+        when [0xFD,0xFF,0xFF,0xFF].pack('c*')
+          case more_bytes[12,4]
+          when [0x04,0x00,0x00,0x00].pack('c*')
+            type = :xls
+          when [0x2D,0x00,0x00,0x00].pack('c*')
+            type = :docfile
+          end
+        end
+      end
+    end
+    return (@magic_number_memo = type) if type
+
+    case bytes[4,4]
+    when 'moov'
+      type = :quicktime
+    when 'ftyp'
       case bytes[8,3]
       when 'iso', 'mp4', 'avc'
         type = :mp4
