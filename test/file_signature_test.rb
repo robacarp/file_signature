@@ -49,6 +49,7 @@ describe File do
     'sample.ogg' => [:ogg, 'application/ogg'],
     'sample.spx' => [:ogg, 'application/ogg'],
     'sample.webm' => [:webm, 'video/webm'],
+    'sample.avi' => [:avi, 'video/x-msvideo'],
     'sample.3gp' => [:video_3gpp, 'video/3gpp'],
     'sample.3g2' => [:video_3gpp2, 'video/3gpp2'],
     'sample.m3u8' => [:m3u8, 'application/vnd.apple.mpegURL'],

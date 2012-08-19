@@ -86,6 +86,7 @@ class IO
     :tar => 'application/x-tar',
     :rar => 'application/x-rar-compressed',
     :webm => 'video/webm',
+    :avi => 'video/x-msvideo',
     :ogg => 'application/ogg',
     :ico => 'image/vnd.microsoft.icon',
     :mp3 => 'audio/mpeg',
@@ -132,8 +133,7 @@ class IO
     :m3u8 => 'application/vnd.apple.mpegURL'
   }
 
-  SignatureSize = [14, SignatureMap.keys.inject(0){ |m,k| k.length > m ? k.length : m }].max
-
+  SignatureSize = SignatureMap.keys.inject(16){ |m,k| k.length > m ? k.length : m }
 
   # Detect the data type by checking various "magic number" conventions
   # for the introductory bytes of a data stream
@@ -171,10 +171,12 @@ class IO
     when 'FORM'
       type = :aiff if bytes[8,3] == 'AIF'
     when 'RIFF'
-      case bytes[8,6]
-      when "WAVEfm"
+      case bytes[8,8]
+      when 'WAVEfmt '
         type = :wave
-      when "WEBPVP"
+      when 'AVI LIST'
+        type = :avi
+      when /WEBPVP/
         type = :webp
       end
     when "PK\003\004"
@@ -188,7 +190,7 @@ class IO
       when '[Content_Types].xml'
         # This is a .docx, .pptx, or .xlsx file
         # To figure out which, is grotty 
-        curr_bytes = [' ', ' ', ' ', ' ']
+        curr_bytes = ['', '', '', '']
         # skip to the 3rd file in the zip archive
         2.times do
           while (c = getc) do
