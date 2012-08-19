@@ -139,7 +139,7 @@ class IO
   #  - :gzip = Unix GZIP compressed data, typical extension ".gz"
   #  - :postscript = Postscript pages, typical extension ".ps"
   #
-  # Return nil if there's no match for any known magic number.
+  # Return nil if there's no match for a known magic number.
   #
   # Example:
   #   f = File.open("test.ps","rb")
@@ -326,8 +326,9 @@ class File
   #
   # Return the MIME type of the file.
   # Returns 'application/octet-stream' for unknown types.
+  #
   # Example:
-  #   File.ime_type("test.ps")
+  #   File.mime_type("test.ps")
   #   => "application/postscript"
   #
   # See
