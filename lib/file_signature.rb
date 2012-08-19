@@ -5,26 +5,22 @@ Please see README
 
 class IO
 
-  # We implement magic by using a lookup hash.
-  # The key is a string that encodes the first bits.
+  # Most signatures are implemented using a lookup hash.
+  # The key is a string consisting of the first several bytes.
   # The value is a symbol that indicates the magic type.
+  # If none of these match, we look for more complicated matches
+  # below.
   #
   # Examples:
-  #   IO::MagicNumberType("BM") => :bitmap
-  #   IO::MagicNumberType("GIF8") => :gif
-  #   IO::MagicNumberType("\xa6\x00") => :pgp_encrypted_data
-  #
-  # Quirks:
-  #   - JPEG adjustment:
-  #     - Some cameras put JPEG Exif data in bytes 3 & 4,
-  #       so we only check the first two bytes of a JPEG.
-  #   - TIFF has two possible matches:
-  #     - MM** is Motorola big endian
-  #     - II** is Intel little ending
+  #   IO::MagicNumberTypeMap("BM") => :bitmap
+  #   IO::MagicNumberTypeMap("GIF8") => :gif
+  #   IO::MagicNumberTypeMap("\xa6\x00") => :pgp_encrypted_data
   #
   # See:
   #  - IO#magic_number_type
   #  - File.magic_number_type
+  #  - IO#mime_type
+  #  - File.mime_type
 
   SignatureMap = {
     "BC" => :bitcode,
@@ -147,14 +143,18 @@ class IO
   #
   # Example:
   #   f = File.open("test.ps","rb")
-  #   put f.magic_number(s)
+  #   f.magic_number_type
   #   => :postscript
   #
   # See:
-  #  - IO::MagicNumberTypeHash
+  #  - IO::MagicNumberTypeMap
+  #  - IO::MimeTypeMap
   #  - File.magic_number_type
+  #  - IO#mime_type
+  #  - File.mime_type
 
   def magic_number_type
+    #--
     return @magic_number_memo if defined? @magic_number_memo
 
     bytes = ""
@@ -266,10 +266,24 @@ class IO
     @magic_number_memo = type
   end
 
+  #++
   # Return the MIME type of the IO stream
   # It's obtained by first finding the magic_number,
   # and then looking up the MIME type from a hash.
-  # Returns 'application/octet-stream' for unknown types 
+  # Returns 'application/octet-stream' for unknown types
+  #
+  # Example:
+  #   f = File.open("test.ps","rb")
+  #   f.mime_type
+  #   => "application/postscript"
+  #
+  # See:
+  #  - IO::MagicNumberTypeMap
+  #  - IO::MimeTypeMap
+  #  - IO#magic_number_type
+  #  - File.magic_number_type
+  #  - File.mime_type
+
   def mime_type
     return @mime_memo if defined? @mime_memo
     type = self.magic_number_type
@@ -290,20 +304,39 @@ class File
   # using IO#magic_number_type to read the first few bytes.
   #
   # Return a magic number type symbol, e.g. :bitmap, :jpg, etc.
+  # Returns nil if the data type is unknown
   #
   # Example:
-  #   puts File.magic_number_type("test.ps") => :postscript
+  #   File.magic_number_type("test.ps")
+  #   => :postscript
   #
   # See
-  #   - IO#MagicNumberTypeHash
-  #   - IO#magic_number_type
+  #  - IO::MagicNumberTypeMap
+  #  - IO::MimeTypeMap
+  #  - IO#magic_number_type
+  #  - IO#mime_type
+  #  - File.mime_type
 
   def self.magic_number_type(file_name)
     File.open(file_name,"rb"){|f| f.magic_number_type }
   end
   
-  # Same, but return the MIME type of the file.
+  # Detect the file's data type by opening the file then
+  # using IO#magic_number_type to read the first few bytes.
+  #
+  # Return the MIME type of the file.
   # Returns 'application/octet-stream' for unknown types.
+  # Example:
+  #   File.ime_type("test.ps")
+  #   => "application/postscript"
+  #
+  # See
+  #  - IO::MagicNumberTypeMap
+  #  - IO::MimeTypeMap
+  #  - IO#magic_number_type
+  #  - IO#mime_type
+  #  - File.magic_number_type
+
   def self.mime_type(file_name)
     File.open(file_name,"rb"){|f| f.mime_type }
   end
