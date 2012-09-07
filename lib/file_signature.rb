@@ -158,10 +158,11 @@ class IO
     return @magic_number_memo if defined? @magic_number_memo
 
     bytes = ""
+    bytes.force_encoding("ASCII-8BIT") if bytes.respond_to?(:force_encoding)
     type = nil
 
-    while bytes.size < SignatureSize
-      bytes << read(1)
+    read(SignatureSize).each_byte do |b|
+      bytes << b
       type = SignatureMap[bytes]
       return @magic_number_memo = type if type
     end
@@ -183,8 +184,7 @@ class IO
       # What looks like a zip archive could contain various things
       seek(30,IO::SEEK_SET)
       # Look at the filename of the first file
-      more_bytes = read(19)
-      case more_bytes
+      case  read(19)
       when /META-INF\/PK/
         type = :jar
       when '[Content_Types].xml'
@@ -200,8 +200,7 @@ class IO
         end
         # and look at its filename
         seek(26, IO::SEEK_CUR)
-        more_bytes = read(5)
-        case more_bytes
+        case read(5)
         when "word/"
           type = :docx
         when /ppt\//
