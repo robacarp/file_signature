@@ -1,26 +1,26 @@
-* Repo: <http://github.com/robacarp/file_signature>
+* Repo: <http://github.com/distler/file_signature>
+* Email: Jacques Distler, <distler@golem.ph.utexas.edu>
 * Email: Robert Carpenter, <coder@robacarp.com>
 * Email: Joel Parker Henderson, <joel@sixarm.com>
 
 ## Introduction
 
+Magic numbers are patterns in the first few bytes of a file or data stream which (hopefully, uniquely) identify the type of the  file or data stream. For example, a file which starts with "%!PS-Adobe-" is very likely a postscript file, whereas one which starts with the three bytes, 1F 8B 08, is very likely a gzip-compressed file.
 
-Magic numbers are the first bits of a file or data stream which uniquely identify the type of file or data stream.
-
-For example when the first bits are "BM", this identifies the file as a bitmap image file.
+This gem allows you to check a file or IO stream against a list of known magic numbers, and thereby determine its type.
 
 Want to help? Feel free to fork it and submit a pull request.
 
 
 ## Install quickstart
 
-Install:
+Install (for the previous 1.1.x version):
 
     gem install file_signature
 
-Bundler:
+Bundler (for the current 1.2.x version):
 
-    gem "file_signature", "~>1.0.0"
+    gem "file_signature", :git => 'http://github.com/distler/file_signature.git'
 
 Require:
 
@@ -28,9 +28,11 @@ Require:
 
 ## Details
 
-This gem infers based on widespread programming conventions for data file formats.  It is tested on MRI 1.9.3.  If you test it and find it working on other rubies please share your success.
+This gem infers the content-type based on widespread programming conventions for data file formats. It is tested on MRI 1.8.7 and 1.9.3.  If you test it and find it working on other rubies please share your success.
 
-These magic numbers are by convention and we are using this guide: http://www.astro.keele.ac.uk/oldusers/rno/Computing/File_magic.html
+Our principal guide to these magic numbers is:
+http://www.garykessler.net/library/file_sigs.html
+But we've also found useful input from [libmagic](https://github.com/glensc/file/tree/master/magic/Magdir) and other sources on the internet.
 
 Typical uses of magic numbers:
 
@@ -44,16 +46,40 @@ Compare:
   * Unix magic() command for testing files on disk
   * http://shared-mime.rubyforge.org/
 
+## Usage
+
+     require 'file_signature'
+
+The gem adds two class methods to the File class, and two instance methods to the IO class.
+
+     File.magic_number_type('myfile')
+
+and
+
+     f = File.open('myfile')
+     f.magic_number_type
+
+both return a symbol (or `nil` if the type is unrecognized) corresponding to the type of file found. Similarly,
+
+     File.mime_type('myfile')
+
+and
+
+     f = File.open('myfile')
+     f.mime_type
+
+return a string, which is the corresponding MIME-type ('`application/octet-stream`' if unrecognized).
+
 ##TODO
 
  * This library currently contains some pathetic handful of bytestrings for type identification... see if we can import some /usr/share/file/magic or something to extend this so its actually useful for more people.
- * I think it might be a good idea to return the full mime type somewhere.
-
+ 
 
 ## Changes
 
 * 2012-03-14 1.0.0 Update docs, tests
 * 2012-05-31 1.1.0 Add memo, reformat and rename things for clarity
+* 2012-08-10 1.2.0 Many new magic numbers and corrections to existing ones, add methods to retrieve mime_type, *lots* of tests
 
 ## License
 
