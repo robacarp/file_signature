@@ -20,7 +20,7 @@ Install (for the previous 1.1.x version):
 
 Bundler (for the current 1.2.x version):
 
-    gem "file_signature", :git => 'http://github.com/distler/file_signature.git'
+    gem "file_signature", :git => 'http://github.com/robacarp/file_signature.git'
 
 Require:
 
