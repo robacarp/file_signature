@@ -1,4 +1,4 @@
-* Repo: <http://github.com/distler/file_signature>
+* Repo: <http://github.com/robacarp/file_signature>
 * Email: Jacques Distler, <distler@golem.ph.utexas.edu>
 * Email: Robert Carpenter, <coder@robacarp.com>
 * Email: Joel Parker Henderson, <joel@sixarm.com>
